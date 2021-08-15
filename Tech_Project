@@ -1,0 +1,128 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+
+import requests
+import pandas as pd
+import sqlalchemy
+import argparse
+import sys
+from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+import mysql.connector as msql
+from mysql.connector import Error
+
+
+def web_tsv_file_to_df(url):
+    # Get a .tsv(or a zipped .tsv) file from the web url and open it as a dataframe
+    df = pd.read_csv(url, sep='\t')
+
+    return df
+
+
+def connect_to_MSBA_DB1():
+    # Create a dictionary that stores the login information to the MSBA_DB1 database
+    # Need to change it to your own login information
+    conn_params_dic = {
+        "host": "msba-bootcamp-prod.cneftpdd0l3q.us-east-1.rds.amazonaws.com",
+        "database": "MSBA_DB1",
+        "user": "ZHUA273",
+        "password": "iz9cwmne"
+
+    }
+    try:
+        print('Connecting to the database...........')
+
+        # Connect to the MSBA_DB1 database in SQL
+        engine = create_engine("mysql+pymysql://%s:%s@%s/%s" % (conn_params_dic['user'],
+                                                                conn_params_dic['password'],
+                                                                conn_params_dic['host'],
+                                                                conn_params_dic['database']))
+        print("Connection successfully...........")
+
+    # Report an error if the connection fails and reset the engine
+    except SQLAlchemyError as e:
+        err = str(e.__dic__['orig'])
+        print("Error while connecting to MySQL", err)
+        engine = None
+
+    return engine
+
+
+def create_table(engine):
+    try:
+        # If there exists a reviews_raw table, drop it and create a new one
+        engine.execute("DROP TABLE IF EXISTS MSBA_Team4.reviews_raw;")
+
+        # Create a table named reviews_raw under the MSBA_Team4 database
+        sql = '''CREATE TABLE MSBA_Team4.reviews_raw(
+        marketplace VARCHAR(256) NOT NULL, 
+        customer_id VARCHAR(256) NOT NULL,
+        review_id VARCHAR(256) NOT NULL,
+        product_id VARCHAR(256) NOT NULL, 
+        product_parent VARCHAR(256) NOT NULL,
+        product_title VARCHAR(256) NOT NULL,
+        product_category VARCHAR(256) NOT NULL,
+        star_rating INTEGER NOT NULL,
+        helpful_votes INTEGER NOT NULL,
+        total_votes INTEGER NOT NULL,
+        vine VARCHAR(256) NOT NULL,
+        verified_purchase VARCHAR(256) NOT NULL,
+        review_headline VARCHAR(256) NOT NULL,
+        review_body VARCHAR(256) NOT NULL,
+        review_date DATE NOT NULL
+        )'''
+
+        engine.execute(sql);
+        print("table is created successfully...........")
+
+    # Report an error if the connection fails during the creation
+    except Error as err:
+        print("Error while connecting to MySQL", err)
+        conn = None
+
+
+def load_data_to_database(df, engine):
+    print("uploading data to the table...........")
+
+    # Load a dataframe into the reviews.raw table in the engine MSBA_DB1 using the target data type
+    df.to_sql(name='reviews_raw', con=engine,
+              schema='MSBA_Team4', if_exists='append', index=False, chunksize=5000)
+
+    print("data of this category is uploaded to review_raw successfully.")
+
+
+def main(category):
+    # Get the dataframe from the web file
+    df = web_tsv_file_to_df('https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Gift_Card_v1_00.tsv.gz')
+
+    # Replace the "_" to " " in the category argument since the user cannot type in " " in the shell.
+    # For example, a user will type in "Gift_Card" when they want to say "Gift Card"
+    category = category.replace('_', ' ')
+
+    # If the input category is in the dataframe, connect to MSBA_DB1, create a review.raw table under MSBA.Team4,
+    # and upload the data of the category from the dataframe to the review.raw table
+    if category in list(df.loc[:, "product_category"]):
+        engine = connect_to_MSBA_DB1()
+        create_table(engine)
+        load_data_to_database(df, engine)
+        print("\n*** inquiry finished ***\n")
+
+    # Report a warning if the input category is not found in the datafame
+    else:
+        print(
+            "Unfortunately we did not find '" + category + "' in our database\nPlease check the spelling or try another category")
+
+
+if __name__ == "__main__":
+    # Define an Shell argument "--category" (short for "-c") such that when the user type in
+    # "--category" or "-c" followed by the category argument in the Shell,
+    # the .py script will execute the main() function.
+    # A help file is also created which can be accessed by "-h" or "--"help"
+    # end of comments
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--category", type=str,
+                        help="Browse the database for the input category and load all data of that category into the database")
+    args = parser.parse_args()
+    main(args.category)
