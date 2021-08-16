@@ -87,7 +87,7 @@ def load_data_to_database(df, engine):
 
     # Load a dataframe into the reviews.raw table in the engine MSBA_DB1 using the target data type
     df.to_sql(name='reviews_raw', con=engine,
-              schema='MSBA_Team4', if_exists='append', index=False, chunksize=5000)
+              schema='MSBA_Team4', if_exists='append', index=True, chunksize=5000)
 
     print("data of this category is uploaded to review_raw successfully.")
 
