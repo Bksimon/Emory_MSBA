@@ -27,7 +27,7 @@ def connect_to_MSBA_DB1():
         "host": "msba-bootcamp-prod.cneftpdd0l3q.us-east-1.rds.amazonaws.com",
         "database": "MSBA_DB1",
         "user": "BKSIMON",
-        "password": "iz9cwmne"
+        "password": ""
 
     }
     try:
