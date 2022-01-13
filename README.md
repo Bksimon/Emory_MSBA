@@ -1,0 +1,3 @@
+# Emory_MSBA 2021-2022
+# Here are some of my coding projects in various languages of python, R, SQL, HQL, pySpark...
+# Mahalos for checking it out!!!
