@@ -1,7 +1,11 @@
+# The following R script utilizes Social Network Analytics to build the network for
+# Venture Capital Firms with co-investments with other firms.  Their position in the network
+# with respect to core or periphery has different effects on the outcomes of their investment
+# deals and terms.  Ultimatly, the network structure and individual venture capital firm's purpose
+# within the network can influence the overall sucess of the firm's investments.
+
 ## Preqin venture deals through late July 2014
 rm(list = ls(all = TRUE))
-setwd("~/Dropbox")
-setwd("C:/Users/dplewi3/Dropbox")
 
 library(data.table)
 library(igraph)
