@@ -1,4 +1,10 @@
 #ISOM 674 ML HW2 Selfies
+# This r script reads in 52 images of faces with eyes centered each with 451 by 451 pixels.
+# Utilizing eigen-value / eigen-vector decomposition we had reduced the dimensionality of the
+# image data while maintaining more than 85% of the variance in the data.  With the reduced 
+# dimensions, we could then reconstruct the faces using k eigenvectors.
+
+#########################
 # Read in the data
 setwd("C:\\Users\\BSim0\\Downloads")
 # Note: Change Filename once the data is finalized
