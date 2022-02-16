@@ -1,4 +1,8 @@
 # ISOM674: HW1 
+# The following R code transforms features to better fit a linearly indepedent and evenly distributed 
+# featureset to predict Home Sales Price with Knn.
+
+########################
 suppressWarnings(if(!require("ISLR")) { install.packages("ISLR"); require("ISLR") })
 suppressWarnings(if(!require("rgl")) { install.packages("rgl"); require("rgl") })
 suppressWarnings(if(!require("FNN")) { install.packages("FNN"); require("FNN") })
